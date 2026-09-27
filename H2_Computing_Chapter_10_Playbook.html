@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F4EEDF">
+<title>H2 Computing — Chapter 10 Practical Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --paper:#F4EEDF;
+  --paper-raised:#FFFDF7;
+  --paper-sunken:#ECE3CB;
+  --ink:#22283B;
+  --ink-soft:#635A49;
+  --rule:#DDD0A8;
+  --rule-strong:#C7B689;
+  --mark-red:#A23B2E;
+  --mark-green:#4C6B4A;
+  --stripe:rgba(34,40,59,.045);
+  --glow:rgba(162,59,46,.07);
+  --shadow:rgba(34,28,15,.16);
+
+  --font-display:'Fraunces',Georgia,'Times New Roman',serif;
+  --font-body:'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular','Courier New',monospace;
+
+  --sidebar-w:284px;
+  --radius:8px;
+}
+html[data-theme="lamp"]{
+  --paper:#1B1712;
+  --paper-raised:#251F17;
+  --paper-sunken:#141110;
+  --ink:#F1E8D6;
+  --ink-soft:#B4A88C;
+  --rule:#3B3325;
+  --rule-strong:#4F452E;
+  --mark-red:#E2775F;
+  --mark-green:#8FAE86;
+  --stripe:rgba(241,232,214,.05);
+  --glow:rgba(226,119,95,.09);
+  --shadow:rgba(0,0,0,.45);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);
+  line-height:1.65;font-size:16.5px;-webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;transition:background-color .3s ease,color .3s ease;
+}
+::selection{background:var(--mark-red);color:var(--paper-raised)}
+img{max-width:100%}
+
+h1,h2{font-family:var(--font-display);color:var(--ink);letter-spacing:-.02em}
+h1{font-size:clamp(2.3rem,5.4vw,4.3rem);line-height:1.04;margin:0 0 20px;font-weight:520;font-variation-settings:"opsz" 90,"SOFT" 30}
+h2{font-size:clamp(1.5rem,2.9vw,2.05rem);margin:0 0 22px;font-weight:560;font-variation-settings:"opsz" 60,"SOFT" 20}
+h3{font-family:var(--font-body);color:var(--mark-red);font-size:1.04rem;font-weight:700;margin:1.6rem 0 .6rem;letter-spacing:.005em}
+h3:first-child{margin-top:0}
+
+p,li{color:var(--ink);max-width:72ch}
+p{margin:0 0 1rem}
+strong{color:var(--ink);font-weight:700}
+em{font-style:italic}
+
+code,.formula{font-family:var(--font-mono);color:var(--mark-green);background:var(--stripe);padding:.15em .4em;border-radius:4px;font-size:.92em}
+p.formula{display:inline-block;padding:.6em 1em;font-size:1rem}
+
+ul,ol{padding-left:1.25em}
+li{margin:.35em 0}
+ul li::marker{color:var(--mark-green)}
+ol li::marker{color:var(--mark-red);font-family:var(--font-mono);font-weight:600}
+
+a{color:var(--mark-red);text-underline-offset:2px}
+
+.wrap{max-width:1040px;margin:0 auto;padding:56px clamp(20px,5vw,56px)}
+
+.skip-link{position:absolute;left:-999px;top:0;background:var(--mark-red);color:var(--paper-raised);padding:12px 22px;border-radius:0 0 8px 0;font-weight:600;text-decoration:none;z-index:300}
+.skip-link:focus{left:0}
+
+.progress-track{position:fixed;top:0;left:0;right:0;height:3px;background:var(--rule);z-index:100}
+.progress-bar{height:100%;width:0%;background:var(--mark-red)}
+
+header{
+  position:relative;padding:100px 0 68px;
+  background:
+    radial-gradient(ellipse 900px 480px at 82% -10%,var(--glow),transparent 60%),
+    repeating-linear-gradient(to bottom,transparent 0 34px,var(--rule) 34px 35px),
+    var(--paper-sunken);
+  border-bottom:3px double var(--rule-strong);
+}
+.badge{display:inline-block;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:7px 14px;border:1px solid var(--rule-strong);border-radius:999px;color:var(--mark-red);background:var(--paper-raised);margin:0 0 20px}
+header .small{display:block;margin-top:18px}
+
+.layout{display:flex;align-items:flex-start;position:relative}
+.sidenav{width:var(--sidebar-w);flex-shrink:0;background:var(--paper-sunken);border-right:1px solid var(--rule);padding:26px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;z-index:20}
+.sidenav-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 18px;padding:0 8px}
+.sidenav-eyebrow{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.sidenav ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+.sidenav a{display:flex;align-items:baseline;gap:10px;padding:9px 8px;border-radius:6px;color:var(--ink-soft);text-decoration:none;font-size:.87rem;transition:background .15s,color .15s}
+.sidenav a .num{font-family:var(--font-mono);font-size:.7rem;color:var(--rule-strong);min-width:1.5em}
+.sidenav a:hover{background:var(--paper-raised);color:var(--ink)}
+.sidenav a.active{background:var(--paper-raised);color:var(--mark-red);font-weight:600}
+.sidenav a.active .num{color:var(--mark-red)}
+
+.scrim{position:fixed;inset:0;background:rgba(20,16,10,.45);opacity:0;pointer-events:none;transition:opacity .25s;z-index:55}
+.scrim.is-open{opacity:1;pointer-events:auto}
+
+.topbar{display:none}
+.hamburger,.theme-toggle,.fab-top{appearance:none;border:1px solid var(--rule-strong);background:var(--paper-raised);color:var(--ink);border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;flex-shrink:0;transition:background .15s,transform .15s}
+.hamburger:hover,.theme-toggle:hover{background:var(--paper-sunken)}
+.icon-moon{display:none}
+html[data-theme="lamp"] .icon-sun{display:none}
+html[data-theme="lamp"] .icon-moon{display:block}
+
+main{flex:1;min-width:0;position:relative;counter-reset:sect}
+main>section{position:relative;isolation:isolate;counter-increment:sect}
+main>section:nth-child(odd){background-image:repeating-linear-gradient(to bottom,transparent 0 34px,var(--rule) 34px 35px)}
+main>section:nth-child(even){background:var(--paper-sunken)}
+main>section::before{
+  content:counter(sect,decimal-leading-zero);position:absolute;top:6px;right:clamp(10px,2.5vw,28px);
+  font-family:var(--font-display);font-weight:300;font-size:clamp(3.2rem,6.4vw,5.6rem);
+  color:var(--ink);opacity:.06;z-index:-1;line-height:1;letter-spacing:-.03em;pointer-events:none;user-select:none;
+}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:16px;margin:20px 0}
+.card{background:var(--paper-raised);border:1px solid var(--rule);border-radius:var(--radius);padding:22px 24px;box-shadow:0 1px 2px var(--shadow);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 28px -16px var(--shadow);border-color:var(--rule-strong)}
+
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0}
+.flow span{background:var(--paper-raised);border:1px solid var(--rule);padding:10px 16px;border-radius:999px;font-size:.92rem;font-weight:600;box-shadow:0 1px 2px var(--shadow)}
+.flow span strong{color:var(--mark-red);margin-right:3px}
+.flow b{color:var(--mark-red);font-weight:700;font-size:1.05rem}
+
+.callout{position:relative;background:var(--paper-raised);border:1px solid var(--rule);border-left:4px solid var(--mark-green);border-radius:var(--radius);padding:20px 22px 20px 54px;margin:24px 0;box-shadow:0 1px 2px var(--shadow)}
+.callout.warn{border-left-color:var(--mark-red)}
+.callout::before{content:"\2713";position:absolute;left:16px;top:22px;width:22px;height:22px;border-radius:50%;background:var(--mark-green);color:var(--paper-raised);font-size:.72rem;font-weight:700;line-height:22px;text-align:center;font-family:var(--font-body)}
+.callout.warn::before{content:"!";background:var(--mark-red)}
+.callout>strong:first-of-type{color:var(--mark-green)}
+.callout.warn>strong:first-of-type{color:var(--mark-red)}
+.callout p{margin-top:8px}
+.callout p:last-child{margin-bottom:0}
+.callout pre.code{margin:12px 0 0}
+
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:.94rem;border:1px solid var(--rule)}
+th{background:var(--ink);color:var(--paper);font-family:var(--font-mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600;padding:13px 16px;text-align:left}
+td{padding:13px 16px;border-top:1px solid var(--rule);vertical-align:top}
+tr:nth-child(even) td{background:var(--stripe)}
+
+.small{font-size:.87rem;color:var(--ink-soft);max-width:60ch}
+
+.quote{font-family:var(--font-display);font-style:italic;font-size:1.14rem;line-height:1.55;color:var(--ink);border-left:3px solid var(--mark-green);margin:24px 0;padding:2px 0 2px 44px;position:relative;max-width:64ch;font-variation-settings:"opsz" 30}
+.quote::before{content:"\201C";position:absolute;left:2px;top:-14px;font-size:2.6rem;color:var(--mark-green);opacity:.45;font-style:normal}
+.good{color:var(--mark-green);font-weight:600}
+.bad{color:var(--mark-red);font-weight:600}
+
+/* --- NEW: multi-line code listings --- */
+.code-label{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.03em;color:var(--mark-green);margin:1.5rem 0 6px;font-weight:600}
+.code-label:first-child{margin-top:0}
+pre.code{
+  background:#1E2430;color:#E7ECF5;font-family:var(--font-mono);font-size:.85rem;line-height:1.65;
+  padding:18px 20px;border-radius:var(--radius);overflow-x:auto;margin:0 0 20px;
+  border:1px solid rgba(0,0,0,.35);box-shadow:0 1px 2px var(--shadow);white-space:pre;
+}
+.io{font-family:var(--font-mono);font-size:.82rem;color:var(--mark-green);background:var(--stripe);border-radius:6px;padding:8px 12px;display:inline-block;margin:0 0 1rem}
+
+footer{background:var(--paper-sunken);border-top:3px double var(--rule-strong);padding:44px 20px}
+footer p{max-width:640px;margin:0 auto 10px;text-align:center;color:var(--ink-soft);font-size:.92rem}
+footer p:first-child{color:var(--ink);font-size:1rem}
+footer strong{color:var(--ink)}
+
+.fab-top{position:fixed;right:22px;bottom:22px;z-index:30;width:44px;height:44px;border-radius:50%;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 8px 20px var(--shadow)}
+.fab-top.is-visible{opacity:1;transform:translateY(0);pointer-events:auto}
+
+a:focus-visible,button:focus-visible{outline:3px solid var(--mark-red);outline-offset:2px;border-radius:4px}
+
+@media (max-width:959px){
+  .layout{display:block}
+  .sidenav{position:fixed;top:0;left:0;height:100vh;width:82vw;max-width:320px;transform:translateX(-101%);transition:transform .28s ease;z-index:60;box-shadow:10px 0 30px var(--shadow)}
+  .sidenav.is-open{transform:translateX(0)}
+  .topbar{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:1px solid var(--rule);padding:10px 16px}
+  .topbar-label{font-family:var(--font-mono);font-size:.8rem;color:var(--ink-soft);flex:1;text-transform:uppercase;letter-spacing:.04em}
+  main>section::before{display:none}
+}
+@media (min-width:960px){ .hamburger{display:none} }
+
+@media (max-width:640px){
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  pre.code{font-size:.78rem}
+  .wrap{padding:40px 20px}
+  header{padding:72px 0 48px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.001ms!important;animation-duration:.001ms!important;scroll-behavior:auto!important}
+}
+
+@media print{
+  :root,html[data-theme="lamp"]{
+    --paper:#fff;--paper-raised:#fff;--paper-sunken:#fff;
+    --ink:#111;--ink-soft:#333;--rule:#999;--rule-strong:#666;
+    --mark-red:#111;--mark-green:#111;--stripe:transparent;--glow:transparent;--shadow:transparent;
+  }
+  .sidenav,.topbar,.scrim,.progress-track,.fab-top,.skip-link{display:none!important}
+  .layout{display:block}
+  body{background:#fff}
+  main>section::before{display:none}
+  main>section{background:#fff!important;background-image:none!important}
+  .wrap{max-width:100%;padding:0 0 20px}
+  .card,.callout{box-shadow:none;border:1px solid #999;break-inside:avoid}
+  pre.code{background:#f4f4f4;color:#111;border:1px solid #999}
+  a{text-decoration:underline}
+  table{page-break-inside:auto}
+  tr{page-break-inside:avoid}
+  header{border-bottom:2px solid #111}
+}
+
+
+/* Chapter navigation and practice desk reuse the original paper/lamp tokens. */
+[hidden]{display:none!important}
+button,input,textarea,select{font:inherit}
+.chapter-tabs{display:flex;flex-wrap:wrap;gap:10px;max-width:928px;margin:30px auto 0;padding:0 20px}
+.chapter-tabs button,.chapter-switch button,.part-switch button,.desk-button,.try-code,.copy-code{border:1px solid var(--rule-strong);border-radius:6px;background:var(--paper-raised);color:var(--ink);padding:9px 13px;cursor:pointer;text-align:left;line-height:1.4}
+.chapter-tabs button{flex:1;min-width:180px;font-family:var(--font-mono);font-size:.85rem}
+.chapter-tabs button span{display:block;font-family:var(--font-body);font-size:1rem;margin-top:5px}
+button[aria-pressed="true"],.desk-button.primary{background:var(--mark-red);color:var(--paper-raised);border-color:var(--mark-red)}
+button:hover{filter:brightness(.96)}
+button:disabled{opacity:.55;cursor:wait}
+.chapter-switch,.part-switch{display:grid;gap:7px;margin-bottom:22px}
+.chapter-switch button{font-weight:600;font-size:.9rem}
+.part-switch{border-top:1px solid var(--rule-strong);padding-top:16px}
+.part-switch button{font-size:.82rem;padding:8px}
+.part-switch button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.sidenav a .num{color:var(--ink-soft)}
+.exam{padding:16px 18px;background:var(--paper-raised);border:1px solid var(--rule);border-radius:8px;margin:24px 0}
+.exam summary{cursor:pointer;font-weight:600;color:var(--mark-green)}
+.exam p{margin:12px 0 0}
+.callout{border-left-width:1px}
+.code-actions{display:flex;justify-content:flex-end;gap:8px;margin:12px 0 6px}
+.try-code,.copy-code{font-size:.78rem;padding:5px 10px}
+.practice-launch{position:fixed;bottom:20px;right:78px;z-index:45;box-shadow:0 4px 18px var(--shadow);font-weight:600}
+.python-desk{position:fixed;right:24px;bottom:78px;width:650px;height:650px;min-width:330px;min-height:330px;max-width:calc(100vw - 16px);max-height:calc(100dvh - 24px);resize:both;overflow:hidden;z-index:80;background:var(--paper-raised);border:1px solid var(--rule-strong);border-radius:10px;box-shadow:0 20px 70px var(--shadow);display:flex;flex-direction:column}
+.desk-title{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--paper-sunken);border-bottom:1px solid var(--rule);cursor:move;touch-action:none;flex-shrink:0}
+.desk-title strong{flex:1;font-family:var(--font-mono);font-size:.85rem}
+.desk-title button{font-size:.8rem;padding:6px 9px;cursor:pointer}
+.desk-body{padding:12px;display:flex;flex-direction:column;gap:9px;min-height:0;flex:1;overflow:auto}
+.desk-toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.desk-toolbar button,.desk-toolbar select{font-size:.8rem}
+.desk-toolbar select{max-width:180px;background:var(--paper);color:var(--ink);border:1px solid var(--rule-strong);padding:7px;border-radius:5px}
+.desk-body label{font-size:.78rem;font-weight:600}
+.desk-editor{width:100%;min-height:140px;flex:1;resize:none;background:#1E2430;color:#E7ECF5;border:1px solid var(--rule-strong);border-radius:6px;padding:12px;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;tab-size:4;white-space:pre;overflow:auto}
+.desk-input{width:100%;height:48px;resize:vertical;min-height:34px;background:var(--paper);color:var(--ink);border:1px solid var(--rule-strong);border-radius:5px;font-family:var(--font-mono);font-size:.8rem;padding:6px}
+.desk-output{margin:0;background:var(--paper-sunken);color:var(--ink);border:1px solid var(--rule);padding:10px;min-height:70px;max-height:180px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--font-mono);font-size:.8rem}
+.desk-hint{font-size:.74rem;color:var(--ink-soft);margin:0;line-height:1.4;max-width:none}
+.desk-status{font-size:.78rem;color:var(--mark-green);margin:0}
+.desk-files{font-size:.73rem;color:var(--ink-soft);overflow-wrap:anywhere}
+.python-desk.minimized{height:auto!important;min-height:0;resize:none}
+.python-desk.minimized .desk-body{display:none}
+.python-desk.fullscreen{inset:12px!important;width:calc(100vw - 24px)!important;height:calc(100dvh - 24px)!important;max-width:none;max-height:none;resize:none}
+textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--mark-red);outline-offset:2px}
+@media(max-width:640px){.python-desk{right:8px;bottom:70px;width:calc(100vw - 16px);min-width:0;height:75dvh}.desk-title{flex-wrap:wrap}.desk-title strong{min-width:120px}.desk-body{padding:9px}.chapter-tabs{padding:0 20px}.chapter-tabs button{min-width:100%;}.practice-launch{right:72px;font-size:.85rem}.grid{grid-template-columns:1fr}}
+@media print{.python-desk,.practice-launch,.chapter-tabs,.code-actions{display:none!important}main>section[hidden]{display:block!important}.exam{break-inside:avoid}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div class="progress-track"><div class="progress-bar" id="progress"></div></div>
+<header>
+  <div class="wrap" style="padding-top:0;padding-bottom:0">
+    <span class="badge">A-Level Singapore H2 Computing &bull; Chapter 10</span>
+    <h1>Data Abstraction<br>Practical Playbook</h1>
+    <p style="font-size:1.2rem;max-width:850px">Your methods, worked through. Data abstraction, stacks, queues and hashing, with space to write and run your own Python.</p>
+    <p class="small">Built from your supplied notes and original hashing playbook. Corrections are marked; practice prompts stay within these examples.</p>
+  </div>
+<div class="chapter-tabs" aria-label="Choose chapter"><button data-choose="a">10A <span>Data Abstraction</span></button><button data-choose="bc">10B–C <span>Stack &amp; Queue</span></button><button data-choose="d">10D <span>Hashing</span></button></div></header>
+<div class="topbar"><button class="hamburger" aria-label="Open navigation" aria-expanded="false" type="button"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="topbar-label" id="topbarLabel">Core</span><button class="theme-toggle" aria-label="Switch between paper and lamp theme" aria-pressed="false" type="button"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button></div>
+<div class="layout">
+<nav class="sidenav" id="sidenav" aria-label="Playbook sections">
+<div class="sidenav-head"><span class="sidenav-eyebrow">Contents</span><button class="theme-toggle" aria-label="Switch between paper and lamp theme" aria-pressed="false" type="button"><svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg><svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button></div>
+<div class="chapter-switch" aria-label="Choose chapter"><button data-choose="a">10A · Data Abstraction</button><button data-choose="bc">10B–C · Stack &amp; Queue</button><button data-choose="d">10D · Hashing</button></div><div id="hashParts" class="part-switch" aria-label="Hashing part"><button data-part-choose="1">1 · Hash values / checksums</button><button data-part-choose="2">2 · Tables without collision</button><button data-part-choose="3">3 · Tables with collisions</button><button data-part-choose="review">Review · Lessons &amp; checklist</button></div><ul id="chapterContents"></ul>
+</nav>
+<div class="scrim" id="scrim"></div>
+<main id="main" tabindex="-1"><section id="a-read" class="wrap" data-chapter="a"><h2>10A. Reading data into records</h2><p>Your method: read the text file, skip its header, split each row and turn that row into a tuple. Use the supplied ADT operations when answering questions about the records.</p><p class="small">Course links: <a href="https://yijc.coursemology.org/courses/2950/assessments/81403" target="_blank" rel="noopener">Data Abstraction (1)</a> · <a href="https://yijc.coursemology.org/courses/2950/assessments/76538" target="_blank" rel="noopener">Data Abstraction (2)</a>. Notes below cover only the material you supplied.</p><pre class="code" data-example="read-csv">def read_csv(filename):
+    data = []
+    with open(filename) as file:
+        lines = file.readlines()
+        for line in lines[1:]:  # skip header
+            row = line.strip().split(&#x27;,&#x27;)
+            data.append(tuple(row))
+    return data
+
+# Keep this supplied line:
+computing_class = read_csv(&quot;result.csv&quot;)</pre><p><code>data = []</code> collects rows. <code>readlines()</code> gives a list of lines; <code>lines[1:]</code> leaves out the first line. <code>strip()</code> removes surrounding whitespace including the newline, and <code>split(',')</code> creates a list of fields. <code>tuple(row)</code> fixes each record’s fields into a tuple. Finally, <code>return data</code> returns the outer list.</p><div class="callout warn"><strong>Checked correction.</strong> The <code>with</code> block closes the file automatically. Your trailing <code>file.close()</code> after <code>return</code> could never execute and is unnecessary. This function returns a <strong>list of tuples</strong>, although the question calls <code>computing_class</code> a tuple. Keep the supplied assignment; your loop works with either outer type.</div><p>Fields remain strings, including numeric-looking fields. The supplied <code>get_level</code> and <code>get_score</code> accessors promise integers. This simple comma split assumes fields do not contain quoted commas or embedded newlines.</p><details class="exam"><summary>What a question might test</summary><p>Explain why the header is skipped, identify the outer and inner collection types, trace one row through strip → split → tuple, or explain why the file is already closed. Upload your own result.csv in the Python panel to run this example.</p></details></section><section id="a-class" class="wrap" data-chapter="a"><h2>Selecting a CG class</h2><p>Each Student ADT contains CG class, name, gender, XP level and XP score. Work through accessors so your answer uses the ADT interface.</p><table><tr><th>Provided operation</th><th>Returns</th></tr><tr><td>get_class(student), get_name(student), get_gender(student)</td><td>string</td></tr><tr><td>get_level(student), get_score(student), size(group)</td><td>integer</td></tr></table><pre class="code" data-example="class-list">def class_list(group, CG):
+    tup = ()
+    for i in group:
+        if get_class(i) == CG:
+            tup = tup + (get_name(i),)
+    return tup</pre><p><code>tup = ()</code> starts an empty tuple. Each <code>i</code> is one Student ADT. The condition selects the CG class. The comma in <code>(get_name(i),)</code> creates a one-element tuple; <code>+</code> creates a new tuple and the assignment replaces <code>tup</code>. No match leaves <code>()</code>. The result preserves the students’ original order.</p><div class="callout warn"><strong>Checked correction.</strong> Your code returns a tuple of <strong>names</strong>. The pasted wording says “all the students”, which may mean complete Student ADTs. If records are required, change only the accumulation to <code>tup = tup + (i,)</code>. If names are required, keep your version. The supplied wording does not resolve this ambiguity.</div><p>The exercise supplies the accessors. Define them from the question’s actual record layout when practising; the notes do not provide their implementations. Iterating over <code>group</code> is fine unless the question specifically requires <code>size(group)</code>.</p><details class="exam"><summary>What a question might test</summary><p>Spot the missing comma in a singleton tuple, distinguish names from Student records, trace multiple/no matches, or explain why accessors avoid depending on the representation.</p></details></section><section id="a-types" class="wrap" data-chapter="a"><h2>List vs tuple</h2><table><tr><th>Feature</th><th>List [ ]</th><th>Tuple ( )</th></tr><tr><td>Mutability</td><td>Mutable: change, add or remove elements</td><td>Immutable: slots cannot be reassigned, added or removed</td></tr><tr><td>Syntax</td><td>[1, 2, 3]</td><td>(1, 2, 3); singleton: (1,)</td></tr><tr><td>Methods</td><td>append(), remove(), sort(), etc.</td><td>count() and index()</td></tr><tr><td>Performance</td><td>Supports resizing and mutation</td><td>Often more compact; speed depends on the operation, not a universal guarantee</td></tr><tr><td>Use</td><td>A dynamic collection that changes</td><td>A fixed collection of values</td></tr><tr><td>Hashability</td><td>Not hashable; cannot be a dictionary key</td><td>Hashable only when every element is hashable</td></tr></table><div class="callout warn"><strong>Checked correction.</strong> “Tuple is faster” is too broad. Also, a tuple can contain a mutable list: its slots are fixed, but that nested list can still change. Such a tuple is not hashable.</div><details class="exam"><summary>What a question might test</summary><p>Choose a suitable collection, explain why tuple concatenation needs reassignment, or decide whether a particular tuple can be a dictionary key.</p></details></section><section id="b-stack" class="wrap" data-chapter="bc"><h2>10B. Stack: last in, first out</h2><p class="small"><a href="https://yijc.coursemology.org/courses/2950/assessments/76537" target="_blank" rel="noopener">LT10B Stack</a></p><p>Imagine a stack of plates: the last plate put on top is the first removed. With your list representation, the right-hand end is the top. Push uses <code>append()</code>; pop removes and returns the last item.</p><pre class="code" data-example="stack-adt">def make_empty_stack():
+    return []
+
+def is_empty_stack(stack):
+    return len(stack) == 0
+
+def push(stack, item):
+    stack.append(item)
+
+def pop(stack):
+    return stack.pop()
+
+def peek(stack):
+    return stack[-1]
+
+def clear(stack):
+    stack.clear()</pre><div class="callout warn"><strong>Checked correction.</strong> Use <code>stack.pop()</code>, not an arbitrary <code>stack.pop(n)</code>, to keep LIFO order. <code>peek</code> reads without removing. These pop/peek implementations require a non-empty stack; check first when that is not guaranteed. The small constructor, push and empty-check definitions above make the operations used in your notes runnable.</div><details class="exam"><summary>What a question might test</summary><p>Trace push/pop/peek, distinguish returning a removed item from changing the stack, or identify an empty-stack error.</p></details></section><section id="b-reverse" class="wrap" data-chapter="bc"><h2>Reversing a string</h2><pre class="code" data-example="reverse">def reverse(string):
+    s = make_empty_stack()
+    for i in string:
+        push(s, i)
+    result = &#x27;&#x27;
+    while not is_empty_stack(s):
+        result += pop(s)
+    return result
+
+print(reverse(&quot;hello&quot;))  # olleh</pre><p>Push h, e, l, l, o in order. The top is now o. Pop repeatedly to build o, l, l, e, h. The loop stops when the stack is empty; an empty input returns an empty string.</p><details class="exam"><summary>What a question might test</summary><p>Trace stack contents after each operation, complete the while condition, or explain why LIFO reverses the order.</p></details></section><section id="b-binary" class="wrap" data-chapter="bc"><h2>Denary to binary</h2><pre class="code" data-example="binary">def denary_to_binary(n):
+    s = make_empty_stack()
+    if n == 0:
+        return &quot;0&quot;
+    while n &gt; 0:
+        push(s, n % 2)
+        n = n // 2
+    binary_str = &#x27;&#x27;
+    while not is_empty_stack(s):
+        binary_str += str(pop(s))
+    return binary_str</pre><div class="callout warn"><strong>Checked correction.</strong> Changed <code>pop(stack)</code> to <code>pop(s)</code>: <code>s</code> is the local stack you created.</div><p>The method assumes a non-negative integer. <code>n % 2</code> produces the next remainder; <code>n // 2</code> removes that binary place. Remainders arrive from the least significant bit first. Popping reverses them into reading order. <code>str()</code> is needed to join the integer bits into a string.</p><p>Trace for 13: push 1, 0, 1, 1; pop 1, 1, 0, 1 → <code>"1101"</code>. Zero needs its own return because the first loop would otherwise run zero times.</p><details class="exam"><summary>What a question might test</summary><p>Trace remainders and quotients, explain % versus //, fix the wrong stack variable, or test zero and powers of two.</p></details></section><section id="b-brackets" class="wrap" data-chapter="bc"><h2>Checking brackets</h2><pre class="code" data-example="brackets">def check_bracket(string):
+    s = make_empty_stack()
+    for i in string:
+        if i == &quot;(&quot;:
+            push(s, i)
+        elif i == &quot;)&quot;:
+            if is_empty_stack(s):
+                return False
+            pop(s)
+    return is_empty_stack(s)
+
+print(check_bracket(&#x27;(()&#x27;))  # False</pre><p>Each opening bracket waits on the stack. Each closing bracket must match one waiting opening bracket. A closing bracket with an empty stack fails immediately. At the end, leftover openings also mean failure. This version handles only parentheses and ignores other characters.</p><details class="exam"><summary>What a question might test</summary><p>Explain the two failure cases. Trace <code>")("</code>, <code>"(()"</code>, <code>"()"</code> and an empty string. Equal counts alone do not ensure the correct order.</p></details></section><section id="b-postfix" class="wrap" data-chapter="bc"><h2>Postfix expressions</h2><p>Operators come after their operands. Read the tuple from left to right; push operands and evaluate when you meet an operator.</p><table><tr><th>Expression</th><th>Working</th><th>Result</th></tr><tr><td>(1, 2, '+')</td><td>1 + 2</td><td>3</td></tr><tr><td>(1, 2, '+', 4, '*')</td><td>(1 + 2) * 4</td><td>12</td></tr><tr><td>(7, 6, 2, '/', '+')</td><td>7 + (6 / 2)</td><td>10.0 in Python</td></tr></table><pre class="code" data-example="postfix">def calculate(inputs):
+    if len(inputs) == 1:
+        return inputs[0]
+    ops = [&#x27;+&#x27;, &#x27;-&#x27;, &#x27;*&#x27;, &#x27;/&#x27;]
+    s = make_empty_stack()
+    for i in inputs:
+        if i in ops:
+            right = pop(s)
+            left = pop(s)
+            if i == &#x27;+&#x27;:
+                push(s, left + right)
+            elif i == &#x27;-&#x27;:
+                push(s, left - right)
+            elif i == &#x27;*&#x27;:
+                push(s, left * right)
+            elif i == &#x27;/&#x27;:
+                push(s, left / right)
+        else:
+            push(s, i)
+    return pop(s)</pre><p>For <code>(7, 6, 2, '/', '+')</code>, the stack becomes [7, 6, 2]. Division pops 2 as right, then 6 as left, and pushes 3.0. Addition then pops 3.0 and 7, producing 10.0. The code assumes a valid postfix expression with numeric operands and no division by zero.</p><h3>Your three debugging lessons</h3><ol><li><code>if i == '+' or '-' or '*' or '/'</code> is always truthy because non-empty strings are truthy. Use <code>i in ops</code>.</li><li><code>popped += pop(s)</code> tries to extend a list using one number. Store the operands separately, or use <code>popped = [pop(s), pop(s)]</code>.</li><li>The first pop is the <strong>right</strong> operand; the second is the <strong>left</strong>. In the two-item list, index 0 is right and index 1 is left.</li></ol><div class="callout warn"><strong>Checked correction.</strong> The final “fix” in your pasted explanation accidentally said left first. Your actual function is correct: <code>right = pop(s)</code> then <code>left = pop(s)</code>. Subtraction and division expose this mistake; addition often hides it.</div><details class="exam"><summary>What a question might test</summary><p>Trace the stack, repair the operator test, or evaluate subtraction/division to check operand order. Explain why a valid expression leaves one final value.</p></details></section><section id="c-queue" class="wrap" data-chapter="bc"><h2>10C. Queue: first in, first out</h2><p class="small"><a href="https://yijc.coursemology.org/courses/2950/assessments/76523" target="_blank" rel="noopener">LT10C Queue</a></p><p>Your queue adds at the rear and removes from the front. The first item added is the first removed. Constructors make queues, accessors inspect them, and modifiers change them.</p><pre class="code" data-example="queue-adt">def make_empty_queue():
+    return []
+
+def make_queue(seq):
+    return list(seq)
+
+def is_empty(queue):
+    return len(queue) == 0
+
+def enqueue(queue, item):
+    queue.append(item)
+
+def dequeue(queue):
+    if is_empty(queue):
+        return None
+    return queue.pop(0)
+
+def front(queue):
+    if is_empty(queue):
+        return None
+    return queue[0]
+
+def size(queue):
+    return len(queue)
+
+def clear(queue):
+    queue.clear()</pre><pre class="code" data-example="queue-example">s3 = make_queue([3, 5, 7, 8])
+print(s3)  # [3, 5, 7, 8]</pre><p><code>make_queue(seq)</code> creates a new list. <code>enqueue</code> changes the queue without returning an item. <code>dequeue</code> changes it and returns the removed item. <code>front</code> leaves it unchanged. Empty <code>front</code> and <code>dequeue</code> return <code>None</code>. <code>size</code> counts items, <code>is_empty</code> tests for zero, and <code>clear</code> removes all items.</p><details class="exam"><summary>What a question might test</summary><p>Trace enqueue/dequeue/front and their return values. Compare <code>pop(0)</code> for FIFO with <code>pop()</code> for LIFO.</p></details></section><section id="c-printer" class="wrap" data-chapter="bc"><h2>Printer Queue ADT</h2><p>A print job is a filename such as <code>"phys quiz.doc"</code>. Build the printer operations using the provided Queue ADT. Printing here is a simulation: remove and return the filename.</p><pre class="code" data-example="printer">def make_print_queue():
+    return make_empty_queue()
+
+def send_job(printq, job):
+    enqueue(printq, job)
+
+def print_job(printq):
+    if is_empty(printq):
+        return None
+    return dequeue(printq)
+
+def cancel_job(printq, job):
+    temp_queue = make_empty_queue()
+    removed = False
+    while not is_empty(printq):
+        current = dequeue(printq)
+        if not removed and current == job:
+            removed = True
+        else:
+            enqueue(temp_queue, current)
+    while not is_empty(temp_queue):
+        enqueue(printq, dequeue(temp_queue))
+    return None
+
+def clear_all(printq):
+    clear(printq)
+
+def next_job(printq):
+    if is_empty(printq):
+        return None
+    return front(printq)
+
+def num_jobs(printq):
+    return size(printq)
+
+def is_pq_empty(printq):
+    return is_empty(printq)</pre><div class="callout warn"><strong>Checked correction.</strong> Your basic <code>cancel_job</code> moved surviving jobs into <code>temp_queue</code> but never moved them back. The second while loop restores them to the original queue in order. <code>make_print_queue</code> now calls the provided constructor, respecting the ADT interface.</div><p><code>removed</code> starts False. Only the first matching job is skipped; setting it True makes all later duplicates survive. Every other item enters the temporary queue and is then restored. If the job is absent, all jobs return unchanged and the function returns None. The basic version also returns None on success because the question specifies no success return value.</p><pre class="code" data-example="printer-example">hp_printer = make_print_queue()
+empty1 = is_empty(hp_printer)
+send_job(hp_printer, &quot;phys quiz.doc&quot;)
+send_job(hp_printer, &quot;maths quiz.doc&quot;)
+send_job(hp_printer, &quot;chem quiz.doc&quot;)
+send_job(hp_printer, &quot;econs quiz.doc&quot;)
+cancel_job(hp_printer, &quot;maths quiz.doc&quot;)
+print1 = print_job(hp_printer)
+print(print1)  # phys quiz.doc</pre><details class="exam"><summary>What a question might test</summary><p>Cancel the first, middle, last or absent job; check duplicates and an empty queue. Explain why the second loop and removed flag are both required. Identify which wrappers modify and which merely inspect.</p></details></section><section id="c-ink" class="wrap" data-chapter="bc"><h2>Printer extension: queue + ink counter</h2><p>The representation changes to <code>[queue, counter]</code>, initially <code>[[], 100]</code>. <code>printq[0]</code> is the queue; <code>printq[1]</code> is the ink counter. Each successful print consumes one unit. Use this version instead of the basic printer functions.</p><pre class="code" data-example="ink">def make_print_queue():
+    return [make_empty_queue(), 100]
+
+def send_job(printq, job):
+    enqueue(printq[0], job)
+
+def print_job(printq):
+    if is_empty(printq[0]):
+        return None
+    if printq[1] == 0:
+        print(&quot;Please replace the empty ink cartridge.&quot;)
+        return False
+    job = dequeue(printq[0])
+    printq[1] -= 1
+    return job
+
+def replace_cart(printq):
+    printq[1] = 100
+
+def cancel_job(printq, job):
+    temp_queue = make_empty_queue()
+    removed = False
+    while not is_empty(printq[0]):
+        current = dequeue(printq[0])
+        if not removed and current == job:
+            removed = True
+        else:
+            enqueue(temp_queue, current)
+    while not is_empty(temp_queue):
+        enqueue(printq[0], dequeue(temp_queue))
+    return None if not removed else printq
+
+def clear_all(printq):
+    clear(printq[0])
+
+def next_job(printq):
+    if is_empty(printq[0]):
+        return None
+    return front(printq[0])
+
+def num_jobs(printq):
+    return size(printq[0])
+
+def is_pq_empty(printq):
+    return is_empty(printq[0])</pre><table><tr><th>Case, checked in order</th><th>Action</th><th>Return</th></tr><tr><td>Queue empty</td><td>No job or ink change</td><td>None</td></tr><tr><td>Ink is 0, job waiting</td><td>Display replacement message; keep job queued</td><td>False</td></tr><tr><td>Ink above 0, job waiting</td><td>Dequeue first job; subtract 1</td><td>Filename</td></tr></table><p>After the last available unit is used, the counter is zero. On the next print attempt with a waiting job, the message appears. It is <code>replace_cart</code> that resets the counter to 100, not <code>print_job</code> automatically. This follows the three explicit cases in your question.</p><p>The other functions operate on <code>printq[0]</code>. Clearing jobs must leave the ink counter intact. Cancellation keeps your extension’s return convention: None if absent, otherwise the modified printq. The queue and ink changes matter independently of that return value.</p><pre class="code" data-example="ink-example">canon_printer = make_print_queue()
+send_job(canon_printer, &quot;phys quiz.doc&quot;)
+send_job(canon_printer, &quot;maths quiz.doc&quot;)
+print(canon_printer)  # [[&quot;phys quiz.doc&quot;, &quot;maths quiz.doc&quot;], 100]
+print(print_job(canon_printer))  # phys quiz.doc
+print(canon_printer)  # [[&quot;maths quiz.doc&quot;], 99]
+canon_printer[1] = 0
+print(print_job(canon_printer))  # replacement message, then False
+replace_cart(canon_printer)
+print(canon_printer[1])  # 100</pre><details class="exam"><summary>What a question might test</summary><p>Adapt every accessor/modifier to the new representation. Trace ink 1 → 0, a blocked print, replacement and an empty queue with zero ink. Verify cancelling/clearing jobs does not consume ink.</p></details></section><section id="c-playlist" class="wrap" data-chapter="bc"><h2>Looping playlist</h2><pre class="code" data-example="playlist">def current_song(playlist, minutes):
+    q = make_queue(playlist)
+    index = int(minutes // 4)
+    for _ in range(index % size(q)):
+        enqueue(q, dequeue(q))
+    return front(q)
+
+# Keep this supplied tuple:
+jay_chou = (&#x27;silent&#x27;, &#x27;rainbow&#x27;, &#x27;nocturne&#x27;, &#x27;excuse&#x27;)
+print(current_song(jay_chou, 22))  # rainbow</pre><p>Assume a non-empty playlist, non-negative elapsed minutes and four minutes per song. <code>minutes // 4</code> counts completed songs, ignoring the partly played one. <code>int</code> makes it an integer even when minutes is a float. <code>% size(q)</code> wraps around the playlist. Each <code>enqueue(q, dequeue(q))</code> moves the front song to the back; <code>front(q)</code> then reads the current song.</p><p>For 22 minutes: 22 // 4 is 5; 5 % 4 is 1. One rotation makes rainbow the front song.</p><table><tr><th>Minutes</th><th>Current song</th></tr><tr><td>3</td><td>silent</td></tr><tr><td>4, 4.1, 7.9, 22</td><td>rainbow</td></tr><tr><td>45</td><td>excuse</td></tr><tr><td>90</td><td>nocturne</td></tr></table><h3>Your shortcut, when direct indexing is allowed</h3><pre class="code" data-example="playlist-shortcut">index = int(minutes // 4) % len(playlist)
+song = playlist[index]  # return this inside your function</pre><div class="callout warn"><strong>Checked correction.</strong> The shortcut needs <code>int()</code> when minutes is a float; a float cannot index a tuple. The queue version is the answer when Queue ADT operations are required. Your pasted “do not run consecutively” note is unnecessary for this implementation: every call creates a fresh queue, so the supplied tuple is unchanged.</div><details class="exam"><summary>What a question might test</summary><p>Test exact boundaries such as 4 minutes, fractional minutes and multiple laps. Explain //, %, int and queue rotation. An empty playlist would cause modulo by zero.</p></details></section><section id="c-bomb" class="wrap" data-chapter="bc"><h2>Pass-the-Bomb game</h2><p>Start with the players in a queue. With n = 2, Player1 and Player2 survive their turns and Player3 is eliminated. The next round starts at Player4; Player6 is eliminated next, then Player9. Continue until one player remains.</p><pre class="code" data-example="bomb">def who_wins(tup, n):
+    q = make_queue(tup)
+    while size(q) &gt; 1:
+        for _ in range(n):
+            enqueue(q, dequeue(q))
+        dequeue(q)
+    return front(q)</pre><p><code>make_queue(tup)</code> copies the players into a queue. The outer loop keeps playing while more than one survives. The inner loop rotates n players safely to the back. The following dequeue removes the next player permanently. Finally, front returns the survivor. Assume at least one player and a non-negative integer n.</p><details class="exam"><summary>What a question might test</summary><p>Trace eliminations, distinguish the rotating dequeue from the eliminating dequeue, or fix an off-by-one error. For ten players and n = 2 the winner is Player4. With n = 0, the front player is eliminated each round; with one player, the outer loop never runs.</p></details></section><section id="core" class="wrap" data-chapter="d" data-part="1">
+<h2>1. What hashing is trying to do</h2>
+
+<p>A hash function takes an input &mdash; usually a string &mdash; and turns it into a small, fixed-range number using arithmetic on the characters. Every exam-spec hash function follows the same shape: <strong>sum something (usually the ASCII value of each character, sometimes weighted by position), then reduce it with a modulus.</strong></p>
+<div class="callout"><strong>Core principle:</strong> a hash function is not "clever" &mdash; it is arithmetic you can trace by hand, character by character. Get the loop, the weights and the modulus exactly right, and checksums, hash tables and collision handling all follow the same underlying shape.</div>
+<div class="grid">
+<div class="card"><h3>Sum</h3><p>Combine each character's value &mdash; usually <code>ord(ch)</code> &mdash; sometimes multiplied by a position weight.</p></div>
+<div class="card"><h3>Reduce</h3><p>Apply <code>% n</code> to compress the sum into a fixed range, from 0 up to <code>n-1</code>.</p></div>
+<div class="card"><h3>Map</h3><p>Use the reduced value as a table index, or as a checksum digit/letter appended to the original data.</p></div>
+<div class="card"><h3>Match the spec</h3><p>Exam questions define the exact weights and modulus to use. Never substitute a formula from a previous question.</p></div>
+</div>
+<p>Two recurring exam applications sit on top of this same arithmetic:</p>
+<div class="flow"><span><strong>1</strong> Checksums</span><b>&#8594;</b><span>catch a mistyped ISBN or NRIC using one extra digit/letter</span></div>
+<div class="flow"><span><strong>2</strong> Hash tables</span><b>&#8594;</b><span>turn a search into a near-instant lookup by computing where an item should live</span></div>
+
+</section><section id="basics" class="wrap" data-chapter="d" data-part="1">
+<h2>2. Building a hash function</h2>
+<p>The most common starting point weights each character by its position, using <code>ord()</code> to convert a character to its ASCII value:</p>
+<p class="code-label">def hash(string) — weighted by position</p>
+<pre class="code">def hash(string):
+    total = 0
+    for i in range(len(string)):
+        total += ord(string[i]) * (i+1)
+    return total
+
+hash('abcde') % 10</pre>
+<h3>Looping style: index vs character</h3>
+<table>
+<tr><th>Loop</th><th>What <code>i</code> is</th><th>When to use it</th></tr>
+<tr><td><code>for i in range(len(s)):</code></td><td>an index (0, 1, 2, &hellip;)</td><td>you need the <em>position</em>, e.g. to weight it or to write <code>s[i]</code></td></tr>
+<tr><td><code>for ch in s:</code></td><td>the character itself</td><td>you only need the <em>letters</em>, not their position</td></tr>
+<tr><td><code>for i, ch in enumerate(s):</code></td><td>both, together</td><td>you need the position <strong>and</strong> the character at the same time</td></tr>
+</table>
+<div class="callout warn"><strong>The mistake that keeps recurring:</strong> writing <code>for i in string</code> and then treating <code>i</code> like a position &mdash; e.g. <code>string[i]</code> or <code>(i+1)</code>. This fails because <code>i</code> <em>is</em> the character, not an index. Fix: loop with <code>range(len(string))</code> when you need position, or use <code>enumerate(string)</code> to get both together.</div>
+<h3>Why the modulo is there</h3>
+<p><code>% n</code> compresses a large, unbounded sum into a fixed range (say, 0&ndash;9 or 0&ndash;12). This prevents overflow and makes the result directly usable as a table index or a single checksum digit.</p>
+
+</section><section id="transmit" class="wrap" data-chapter="d" data-part="1">
+<h2>3. Worked example &mdash; the transmit() checksum</h2>
+<p>A first attempt, written with an explicit counter and if-chain:</p>
+<p class="code-label">def transmit(data) — verbose version</p>
+<pre class="code">def transmit(data):
+    sum = 0
+    count = 0
+    if len(data) &gt; 5:
+        return None
+    for i in range(len(data)):
+        if count == 0:
+            sum += int(data[i]) * 3
+            count += 1
+        if count == 1:
+            sum += int(data[i]) * 5
+            count += 1
+        if count == 2:
+            sum += int(data[i]) * 7
+            count += 1
+        if count == 3:
+            sum += int(data[i]) * 9
+            count += 1
+        if count == 4:
+            sum += int(data[i]) * 11
+            count += 1
+    n = sum % 10
+    return str(data) + str(n)
+
+transmit('54321')</pre>
+<p>A cleaner version using a fixed weights list instead of a branching counter:</p>
+<p class="code-label">def transmit(data) — weights-list version</p>
+<pre class="code">def transmit(data):
+    multipliers = [3, 5, 7, 9, 11]
+    total = 0
+    for i in range(5):
+        total += int(data[i]) * multipliers[i]
+    checksum = total % 10
+    return data + str(checksum)</pre>
+<div class="callout warn"><strong>Mistake: summing the index instead of the digit.</strong> Writing <code>sum += int(i) * 3</code> uses <code>i</code> &mdash; the index &mdash; instead of <code>data[i]</code>, the actual character. Always dereference the string with the index, then convert to <code>int</code>, before doing arithmetic on it.</div>
+<div class="callout"><strong>Do not overcomplicate it:</strong> a fixed weights list <code>[3,5,7,9,11]</code> looped over <code>range(5)</code> replaces a four-branch <code>if</code> chain, and is far less error-prone under exam time pressure.</div>
+
+</section><section id="isbn" class="wrap" data-chapter="d" data-part="1">
+<h2>4. Checksum systems &mdash; ISBN-10</h2>
+<p>Every published book carries an International Standard Book Number. The first 9 digits identify the book; a 10th <strong>check digit</strong> is calculated from them using a weighted-modulus scheme, so that a single mistyped digit can be detected.</p>
+<h3>The algorithm</h3>
+<ol>
+<li>Multiply each of the 9 digits by a fixed weight: <code>10, 9, 8, 7, 6, 5, 4, 3, 2</code> respectively.</li>
+<li>Add the 9 products together to get a total.</li>
+<li>Divide the total by 11 and take the remainder.</li>
+<li>The check digit is <code>(11 &minus; remainder) % 11</code>.</li>
+</ol>
+<div class="callout warn"><strong>Special case:</strong> if the calculated check digit is 10, it is written as the character <code>'X'</code> instead of a two-digit number.</div>
+<p>Worked example for <code>075154926</code>:</p>
+<p class="formula">0&times;10 + 7&times;9 + 5&times;8 + 1&times;7 + 5&times;6 + 4&times;5 + 9&times;4 + 2&times;3 + 6&times;2 = 214</p>
+<p class="formula">214 &divide; 11 = 19 remainder 5 &nbsp;&rarr;&nbsp; check digit = (11 &minus; 5) % 11 = 6</p>
+<p class="io">Complete ISBN: 0751549266</p>
+<p class="code-label">def isbn(string)</p>
+<pre class="code">def isbn(string):
+    count = 0
+    mult = [10, 9, 8, 7, 6, 5, 4, 3, 2]
+
+    for i in range(len(string)):
+        count += int(string[i]) * int(mult[i])
+
+    count = 11 - count
+    n = round(count % 11)
+    if n == 10:
+        return string + 'X'
+    else:
+        return string + str(n)
+
+isbn('034085045')</pre>
+<table>
+<tr><th>Input</th><th>Output</th></tr>
+<tr><td>184146208</td><td>184146208X</td></tr>
+<tr><td>034085045</td><td>0340850450</td></tr>
+</table>
+<div class="callout"><strong>Summary:</strong> weight the 9 digits with <code>[10..2]</code>, sum the products, take the remainder mod 11, then compute <code>(11 &minus; remainder) % 11</code> &mdash; substituting <code>'X'</code> if that check digit equals 10.</div>
+
+</section><section id="nric" class="wrap" data-chapter="d" data-part="1">
+<h2>5. Checksum systems &mdash; NRIC</h2>
+<p>Singapore's NRIC/FIN checksum follows the same weighted-modulus shape as ISBN, but with its own weights, its own modulus-11 letter mapping, and a starting-letter adjustment.</p>
+<p class="code-label">def last_letter(nric)</p>
+<pre class="code">def last_letter(nric):
+    count = 0
+    mult = [2,7,6,5,4,3,2]
+    if nric[0] == 'T':
+        count += 4
+    nric = nric[1::]
+    for i in range(len(nric)):
+        count += int(nric[i]) * int(mult[i])
+    n = round(count % 11)
+    let = ['J','Z','I','H','G','F','E','D','C','B','A']
+
+    return let[n]
+
+last_letter('T1234567')</pre>
+<h3>Summary of the approach</h3>
+<ol>
+<li>Start with a base count &mdash; add 4 if the first letter is <code>'T'</code>.</li>
+<li>Strip off the first character (<code>nric[1:]</code>) to process only the digits.</li>
+<li>Multiply each digit by a fixed multiplier list <code>[2,7,6,5,4,3,2]</code>.</li>
+<li>Sum the products, then reduce with <code>% 11</code>.</li>
+<li>Map the remainder to a letter using a fixed lookup list.</li>
+</ol>
+<table>
+<tr><th>Mistake</th><th>Fix</th></tr>
+<tr><td>Division instead of modulo: <code>round(count / 11)</code></td><td>That gives the quotient, not the remainder &mdash; use <code>count % 11</code>.</td></tr>
+<tr><td>Letter list error: duplicated <code>'J'</code>, missing <code>'H'</code></td><td>The exact list is <code>['J','Z','I','H','G','F','E','D','C','B','A']</code>, one-to-one with remainders 0&ndash;10.</td></tr>
+<tr><td>Index alignment: looping over the full NRIC without stripping the leading letter</td><td>Strip <code>nric[1:]</code> first &mdash; the multiplier list has only 7 values, for 7 digits, or an <code>IndexError</code> follows.</td></tr>
+</table>
+<div class="callout"><strong>Notes to remember:</strong> always use <code>% 11</code> for the remainder, check that the multiplier list length matches the number of digits actually processed, and keep the mapping table exact &mdash; one-to-one with no duplicates or gaps.</div>
+
+</section><section id="nocollision" class="wrap" data-chapter="d" data-part="2">
+<h2>6. Hash tables without collision handling</h2>
+<p>A hash table turns a linear search into a near-instant lookup: compute an index from the item, store the item there, and search by recomputing the same index.</p>
+<p class="code-label">Basic table: init_table / hashtable / search</p>
+<pre class="code">def hash(string):
+    total = 0
+    for i in range(len(string)):
+        total += ord(string[i]) * (i+1)
+    return total
+
+def init_table(n):
+    return [''] * n
+
+def hashtable(seq):
+    n = len(seq)
+    table = init_table(n)
+    for item in seq:
+        val = hash(item) % n
+        if table[val] == '':
+            table[val] = item
+    return table
+
+data = ['cdab', 'dbac', 'adcb', 'acbd', 'abcd']
+data_table = hashtable(data)
+
+def search(table, item):
+    n = len(table)
+    val = hash(item) % n
+    if table[val] == item:
+        return True
+    else:
+        return False
+
+search(data_table, 'bdca')</pre>
+<h3>2018 YIJC Promo Exam &mdash; Task 3.1 &amp; 3.2</h3>
+<p>A supermarket grocery inventory stores item names in a hash table for easy search and retrieval. The exam's hash function uses the ASCII values of the characters, unweighted:</p>
+<p class="formula">hash('onion') = (111+110+105+111+110) % 13 = 547 % 13 = 1</p>
+<div class="callout warn"><strong>Note given in the question:</strong> an empty string <code>''</code> denotes an empty cell in the hash table. You may assume no collisions occur.</div>
+<p class="code-label">Exam-spec hash() and hash_table() — table size 13</p>
+<pre class="code">def hash(string):
+    total = 0
+    for i in range(len(string)):
+        total += ord(string[i])
+    return total % 13
+
+def hash_table(seq):
+    table = []
+    table += [''] * 13
+    for i in range(len(seq)):
+        index = hash(seq[i])
+        table[index] = seq[i]
+    return table
+
+keys1 = ('onion','tomato','cabbage', 'okra','banana', 'salt','cucumber','mushroom', 'orange')
+table1 = hash_table(keys1)</pre>
+<table>
+<tr><th>Mistake</th><th>Fix</th></tr>
+<tr><td>Treating characters as strings instead of ASCII values</td><td>Use <code>ord(ch)</code> to get the numeric value before summing.</td></tr>
+<tr><td>Hashing the entire list (<code>str(seq)</code>) instead of each element</td><td>Loop through each item individually and hash it on its own.</td></tr>
+<tr><td>Search re-loops over the item's characters</td><td>Hash the whole item once with <code>hash(item) % n</code>, then compare directly.</td></tr>
+</table>
+
+</section><section id="chaining" class="wrap" data-chapter="d" data-part="3">
+<h2>7. Collision handling &mdash; separate chaining</h2>
+<p>When two items hash to the same index, separate chaining stores <strong>more than one item per slot</strong>: a slot starts empty, becomes a single string on its first item, then becomes a list once a second item collides into it.</p>
+<p class="code-label">hashtable() / search() with chaining</p>
+<pre class="code">def hashtable(seq):
+    n = len(seq)
+    table = init_table(n)
+    for i in range(len(seq)):
+        index = hash(seq[i]) % n
+        if table[index] == '':
+            table[index] = seq[i]
+        elif type(table[index]) == str:
+            table[index] = [table[index], seq[i]]
+        else:
+            table[index].append(seq[i])
+    return table
+
+def search(table, item):
+    index = hash(item) % len(table)
+    if table[index] == '':
+        return False
+    return item in table[index]
+
+data = ['cdab','dbac','dabc','bdac','badc']
+data_table = hashtable(data)
+search(data_table, 'cdab')</pre>
+<table>
+<tr><th>Mistake</th><th>Fix</th></tr>
+<tr><td>Appending to a string: calling <code>.append()</code> on the first item stored as a plain string raises <code>AttributeError</code></td><td>Strings are immutable and have no <code>.append()</code> &mdash; convert the slot to a list on the first collision.</td></tr>
+<tr><td>Mixing slot types inconsistently (some string, some list)</td><td>Pick one convention: empty&nbsp;&rarr;&nbsp;<code>''</code>, first item&nbsp;&rarr;&nbsp;string, second item&nbsp;&rarr;&nbsp;convert to list, third+&nbsp;&rarr;&nbsp;append.</td></tr>
+<tr><td>Confusing <code>for item in seq</code> with <code>for i in range(len(seq))</code></td><td><code>item</code> is already the element &mdash; don't re-index it with <code>hash(seq[item])</code>.</td></tr>
+</table>
+<div class="callout"><strong>Why <code>item in table[index]</code> works either way:</strong> Python's <code>in</code> operator checks list <em>membership</em> and string <em>substring containment</em> &mdash; so the same line searches correctly whether the slot holds one string or a list of strings.</div>
+<div class="callout"><strong>Cleanest design:</strong> initialise every slot as <code>''</code>. On the first insert, replace it directly with the item (as a string). On a collision, convert to a list and append. Alternatively, start every slot as a list from the beginning, to avoid the type-juggling entirely.</div>
+
+</section><section id="chaining-exam" class="wrap" data-chapter="d" data-part="3">
+<h2>8. Exam-spec chaining &mdash; 2018 YIJC Promo (no <code>in</code>)</h2>
+<p>Task 3.3 &amp; 3.4 supply the hash function and ask for <code>hash_table(seq)</code> using separate chaining, plus a <code>search(item)</code> that returns <code>True</code>/<code>False</code> &mdash; with one added constraint:</p>
+<div class="callout warn"><strong>Note given in the question:</strong> do not use Python's built-in <code>in</code> operator inside the search function.</div>
+<p class="code-label">Given hash(), plus hash_table() / search() without `in`</p>
+<pre class="code">def hash(string):
+   result = 0
+   for i in string:
+       result = result + ord(i)
+   return result % 13
+
+def hash_table(seq):
+    table = []
+    table += [''] * len(seq)
+
+    for i in range(len(seq)):
+        index = hash(seq[i])
+        if table[index] == '':
+            table[index] = seq[i]
+        elif type(table[index]) == str:
+            table[index] =  [table[index], seq[i]]
+        else:
+            table[index].append(seq[i])
+    return table
+
+def search(table, item):
+    index = hash(item)
+    if table[index] == '':
+        return False
+    elif type(table[index]) == str:
+        return table[index] == item
+    else:
+        for i in range(len(table[index])):
+            cell = table[index]
+            if cell[i] == item:
+                return True
+        return False
+
+keys2 = ('onion','tomato','cabbage','carrot', 'okra','mellon','potato','banana',
+         'olive','salt','cucumber','mushroom', 'orange')
+table2 = hash_table(keys2)
+search(table2, 'cake')</pre>
+<table>
+<tr><th>Mistake</th><th>Fix</th></tr>
+<tr><td>Indexing error: <code>table[i]</code> used instead of <code>table[index]</code></td><td>Always index with the computed hash value, not the loop counter.</td></tr>
+<tr><td>Collision handling nested wrong: <code>table[i] = [table[i], seq[i]]</code></td><td>Convert the existing string to a list on the first collision, then <code>.append()</code> further items.</td></tr>
+<tr><td>Search bugs: used the word <code>list</code> as a variable name; returned <code>False</code> too early inside the loop</td><td>Loop through the <strong>entire</strong> chain, and only return <code>False</code> once the loop has finished without a match.</td></tr>
+<tr><td>Considered adding <code>% len(table)</code> inside search</td><td>The given <code>hash()</code> already reduces mod 13 to match the table's 13 slots &mdash; don't reduce twice.</td></tr>
+</table>
+<div class="callout"><strong>Why this is exam-correct:</strong> the hash function matches the given specification exactly (unweighted ASCII sum, <code>% 13</code>); the table implements chaining consistently (empty&nbsp;&rarr;&nbsp;string&nbsp;&rarr;&nbsp;list-on-collision); and <code>search()</code> never calls Python's <code>in</code> operator, satisfying the question's explicit constraint.</div>
+
+</section><section id="probing" class="wrap" data-chapter="d" data-part="3">
+<h2>9. Collision handling &mdash; linear probing</h2>
+<p>Linear probing keeps one item per slot, but on a collision it scans forward &mdash; wrapping around to the front of the table &mdash; until it finds an empty slot. A small warm-up function isolates just the wrap-around traversal pattern:</p>
+<p class="code-label">def browse(array, n) — the wrap-around pattern</p>
+<pre class="code">def browse(array, n):
+    num = len(array)
+
+    # Phase 1: from n to end
+    for i in range(n, num):
+        print(array[i])
+
+    # Phase 2: from 0 to n-1
+    for i in range(0, n):
+        print(array[i])
+
+lst = ['a', 'e', 'i', 'o', 'u']
+browse(lst, 2)   # output: 'i' -&gt; 'o' -&gt; 'u' -&gt; 'a' -&gt; 'e'</pre>
+<table>
+<tr><th>Mistake</th><th>Fix</th></tr>
+<tr><td>Nested <code>while count &lt; num</code> loops caused repeated printing</td><td>Two clean <code>for</code> loops &mdash; one per phase &mdash; are enough.</td></tr>
+<tr><td>Variable shadowing: reusing <code>i</code> inside a nested loop</td><td>Give nested loops distinct variable names.</td></tr>
+<tr><td>Assumed <code>range(n, num+1)</code> was needed</td><td><code>range()</code> already excludes its end, and the array's last valid index is <code>num-1</code> &mdash; the two "off-by-ones" cancel out.</td></tr>
+</table>
+<p>The same wrap-around pattern drives both insertion and search:</p>
+<p class="code-label">hashtable() / search() with linear probing</p>
+<pre class="code">def hashtable(seq):
+    tbl = init_table(len(seq))
+    for item in seq:                     # Loop 1: go through each item
+        num = len(tbl)
+        index = hash(item) % num
+
+        # Loop 2: Phase 1, from index -&gt; end
+        for i in range(index, num):
+            if tbl[i] == '':
+                tbl[i] = item
+
+        # Loop 3: Phase 2, from 0 -&gt; index-1
+        for i in range(0, index):
+            if tbl[i] == '':
+                tbl[i] = item
+    return tbl
+
+def search(table, item):
+    num = len(table)
+    index = hash(item) % num
+
+    # Phase 1: from index to end
+    for i in range(index, num):
+        if table[i] == '':
+            return False
+        if table[i] == item:
+            return True
+
+    # Phase 2: from 0 to index-1
+    for i in range(0, index):
+        if table[i] == '':
+            return False
+        if table[i] == item:
+            return True
+
+    return False
+
+data = ['cdab','dbac','dabc','bdac','badc']
+data_table = hashtable(data)
+search(data_table, 'bcda')</pre>
+<div class="callout"><strong>How to read it:</strong> compute the starting index, then scan forward to the end of the table (Phase 1), then wrap around and scan from the front up to that starting index (Phase 2). Insert &mdash; or match &mdash; at the first empty slot or exact match. Stop scanning the moment an empty slot appears: that proves the item cannot be any further along the probe sequence.</div>
+
+</section><section id="lessons" class="wrap" data-chapter="d" data-part="review">
+<h2>10. Recurring exam lessons</h2>
+<div class="grid">
+<div class="card"><h3>ISBN vs NRIC</h3><p>Both are weighted-sum-then-modulo checksums, but ISBN uses weights <code>[10..2]</code> mod 11 with a special <code>'X'</code> case; NRIC uses weights <code>[2,7,6,5,4,3,2]</code> mod 11 mapped through a letter table.</p></div>
+<div class="card"><h3>Hash functions are problem-specific</h3><p>Always implement exactly what the question defines &mdash; weighted or plain ASCII sum &mdash; don't reuse a previous question's formula.</p></div>
+<div class="card"><h3>Hash table basics</h3><p>Initialise every slot as <code>''</code>; compute <code>index = hash(item) % n</code>; resolve collisions exactly as the question specifies &mdash; skip, chain, or probe.</p></div>
+<div class="card"><h3>Search logic</h3><p>Hash the whole item once &mdash; don't loop over its characters again inside search.</p></div>
+</div>
+<div class="quote">Exam questions reward precision: stick to the given specification, don't add extra weighting, don't use a forbidden built-in, and don't reduce modulo twice.</div>
+
+</section><section id="checklist" class="wrap" data-chapter="d" data-part="review">
+<h2>11. Before-the-exam checklist</h2>
+<div class="card">
+<ul>
+<li>Did I use <code>range(len(x))</code> when I need the index, and <code>for ch in x</code> / <code>enumerate(x)</code> when I need the character?</li>
+<li>Did I use <code>%</code> (modulo), not <code>/</code> (division), wherever the question asks for a remainder?</li>
+<li>Does my weights list length match the number of characters I'm actually looping over &mdash; after stripping any prefix letter?</li>
+<li>Does my table size match the modulus used inside <code>hash()</code> &mdash; e.g. 13 slots for <code>% 13</code>?</li>
+<li>Am I indexing with the computed hash value, not the loop counter?</li>
+<li>Have I handled the collision case exactly as specified &mdash; skip, chain, or probe &mdash; not just the method I personally prefer?</li>
+<li>Have I checked special-case outputs &mdash; check digit 10&nbsp;&rarr;&nbsp;<code>'X'</code>, and that a letter-mapping table has no duplicates or gaps?</li>
+<li>If the question forbids a built-in (like <code>in</code>), have I actually avoided it everywhere, including inside loops?</li>
+</ul>
+</div>
+<div class="callout warn"><strong>Red flag:</strong> if your code works on the sample data but you can't explain, by hand, why the modulo or the loop range is correct, it will fail the exam's second test case.</div>
+
+</section></main>
+</div>
+<footer>
+<p>H2 Computing Chapter 10 Playbook &bull; Designed for active revision, not memorisation.</p>
+<p>Core rule: <strong>Match the question’s exact specification. Trace your data, explain each operation, and test the boundary cases.</strong></p>
+</footer>
+<button class="fab-top" id="fabTop" aria-label="Back to top" type="button"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+<script>
+(function(){
+  var root = document.documentElement;
+  function applyTheme(t){
+    if(t === 'lamp'){ root.setAttribute('data-theme','lamp'); }
+    else { root.removeAttribute('data-theme'); }
+    document.querySelectorAll('.theme-toggle').forEach(function(btn){
+      btn.setAttribute('aria-pressed', t === 'lamp' ? 'true' : 'false');
+    });
+  }
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var currentTheme = prefersDark ? 'lamp' : 'paper';
+  applyTheme(currentTheme);
+  document.querySelectorAll('.theme-toggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      currentTheme = currentTheme === 'lamp' ? 'paper' : 'lamp';
+      applyTheme(currentTheme);
+    });
+  });
+
+  var sidenav = document.getElementById('sidenav');
+  var scrim = document.getElementById('scrim');
+  function openNav(){
+    sidenav.classList.add('is-open'); scrim.classList.add('is-open');
+    document.querySelectorAll('.hamburger').forEach(function(b){ b.setAttribute('aria-expanded','true'); });
+  }
+  function closeNav(){
+    sidenav.classList.remove('is-open'); scrim.classList.remove('is-open');
+    document.querySelectorAll('.hamburger').forEach(function(b){ b.setAttribute('aria-expanded','false'); });
+  }
+  document.querySelectorAll('.hamburger').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(sidenav.classList.contains('is-open')){ closeNav(); } else { openNav(); }
+    });
+  });
+  if(scrim){ scrim.addEventListener('click', closeNav); }
+  sidenav.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeNav); });
+
+  var progress = document.getElementById('progress');
+  function updateProgress(){
+    var h = document.documentElement;
+    var scrolled = h.scrollTop;
+    var height = h.scrollHeight - h.clientHeight;
+    var pct = height > 0 ? (scrolled/height)*100 : 0;
+    progress.style.width = pct + '%';
+  }
+  document.addEventListener('scroll', updateProgress, {passive:true});
+  updateProgress();
+
+  var fab = document.getElementById('fabTop');
+  function updateFab(){
+    if(window.scrollY > 480){ fab.classList.add('is-visible'); } else { fab.classList.remove('is-visible'); }
+  }
+  document.addEventListener('scroll', updateFab, {passive:true});
+  updateFab();
+  fab.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+
+})();
+</script>
+<button id="practiceLaunch" class="desk-button primary practice-launch" aria-controls="pythonDesk" aria-expanded="false">&lt;/&gt; Python practice</button>
+<aside id="pythonDesk" class="python-desk" aria-label="Python practice" hidden>
+  <div class="desk-title" id="deskDrag" tabindex="0" aria-label="Drag to move Python panel, or use arrow keys">
+    <strong>Python practice</strong>
+    <button class="desk-button" id="deskMin" aria-label="Minimise Python panel">Minimise</button>
+    <button class="desk-button" id="deskMax" aria-label="Expand Python panel">Expand</button>
+    <button class="desk-button" id="deskClose" aria-label="Close Python panel">Close</button>
+  </div>
+  <div class="desk-body">
+    <p class="desk-hint">Drag the title bar · resize from the lower-right corner · Ctrl/⌘ + Enter to run. First run downloads Python (internet required). Code runs in this browser.</p>
+    <div class="desk-toolbar">
+      <button id="runCode" class="desk-button primary">Run Python</button>
+      <button id="stopCode" class="desk-button" disabled>Stop</button>
+      <button id="downloadCode" class="desk-button">Save .py</button>
+      <button id="uploadFiles" class="desk-button">Add CSV / text file</button>
+      <input id="fileInput" type="file" multiple hidden>
+    </div>
+    <label for="pythonEditor">Your code <span id="draftStatus" class="desk-hint"></span></label>
+    <textarea id="pythonEditor" class="desk-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="runHint"></textarea>
+    <div class="desk-toolbar"><label for="helperChoice">ADT helpers</label><select id="helperChoice"><option value="none">None</option><option value="stack">Stack</option><option value="queue">Queue</option><option value="printer">Basic printer + Queue</option><option value="ink">Ink printer + Queue</option></select></div>
+    <p class="desk-hint" id="runHint">Each run starts with fresh variables. Selected helpers run before your code. Uploaded files stay available until the page closes. “Try in Python” saves your current draft before loading an example.</p>
+    <div class="desk-toolbar"><button id="restoreDraft" class="desk-button">Restore previous draft</button><span id="filesLabel" class="desk-files">No files added</span></div>
+    <details><summary class="desk-hint">Input for input() · one answer per line</summary><label for="stdinText">Prepared input</label><textarea id="stdinText" class="desk-input" spellcheck="false"></textarea></details>
+    <p id="pythonStatus" class="desk-status" role="status">Ready to load Python</p>
+    <label for="pythonOutput">Output / errors</label><pre id="pythonOutput" class="desk-output" tabindex="0">Write your code, then choose Run Python.</pre>
+  </div>
+</aside>
+
+<script>const EXAMPLES = {"read-csv": "def read_csv(filename):\n    data = []\n    with open(filename) as file:\n        lines = file.readlines()\n        for line in lines[1:]:  # skip header\n            row = line.strip().split(',')\n            data.append(tuple(row))\n    return data\n\n# Keep this supplied line:\ncomputing_class = read_csv(\"result.csv\")", "class-list": "def class_list(group, CG):\n    tup = ()\n    for i in group:\n        if get_class(i) == CG:\n            tup = tup + (get_name(i),)\n    return tup", "stack-adt": "def make_empty_stack():\n    return []\n\ndef is_empty_stack(stack):\n    return len(stack) == 0\n\ndef push(stack, item):\n    stack.append(item)\n\ndef pop(stack):\n    return stack.pop()\n\ndef peek(stack):\n    return stack[-1]\n\ndef clear(stack):\n    stack.clear()", "reverse": "def reverse(string):\n    s = make_empty_stack()\n    for i in string:\n        push(s, i)\n    result = ''\n    while not is_empty_stack(s):\n        result += pop(s)\n    return result\n\nprint(reverse(\"hello\"))  # olleh", "binary": "def denary_to_binary(n):\n    s = make_empty_stack()\n    if n == 0:\n        return \"0\"\n    while n > 0:\n        push(s, n % 2)\n        n = n // 2\n    binary_str = ''\n    while not is_empty_stack(s):\n        binary_str += str(pop(s))\n    return binary_str", "brackets": "def check_bracket(string):\n    s = make_empty_stack()\n    for i in string:\n        if i == \"(\":\n            push(s, i)\n        elif i == \")\":\n            if is_empty_stack(s):\n                return False\n            pop(s)\n    return is_empty_stack(s)\n\nprint(check_bracket('(()'))  # False", "postfix": "def calculate(inputs):\n    if len(inputs) == 1:\n        return inputs[0]\n    ops = ['+', '-', '*', '/']\n    s = make_empty_stack()\n    for i in inputs:\n        if i in ops:\n            right = pop(s)\n            left = pop(s)\n            if i == '+':\n                push(s, left + right)\n            elif i == '-':\n                push(s, left - right)\n            elif i == '*':\n                push(s, left * right)\n            elif i == '/':\n                push(s, left / right)\n        else:\n            push(s, i)\n    return pop(s)", "queue-adt": "def make_empty_queue():\n    return []\n\ndef make_queue(seq):\n    return list(seq)\n\ndef is_empty(queue):\n    return len(queue) == 0\n\ndef enqueue(queue, item):\n    queue.append(item)\n\ndef dequeue(queue):\n    if is_empty(queue):\n        return None\n    return queue.pop(0)\n\ndef front(queue):\n    if is_empty(queue):\n        return None\n    return queue[0]\n\ndef size(queue):\n    return len(queue)\n\ndef clear(queue):\n    queue.clear()", "queue-example": "s3 = make_queue([3, 5, 7, 8])\nprint(s3)  # [3, 5, 7, 8]", "printer": "def make_print_queue():\n    return make_empty_queue()\n\ndef send_job(printq, job):\n    enqueue(printq, job)\n\ndef print_job(printq):\n    if is_empty(printq):\n        return None\n    return dequeue(printq)\n\ndef cancel_job(printq, job):\n    temp_queue = make_empty_queue()\n    removed = False\n    while not is_empty(printq):\n        current = dequeue(printq)\n        if not removed and current == job:\n            removed = True\n        else:\n            enqueue(temp_queue, current)\n    while not is_empty(temp_queue):\n        enqueue(printq, dequeue(temp_queue))\n    return None\n\ndef clear_all(printq):\n    clear(printq)\n\ndef next_job(printq):\n    if is_empty(printq):\n        return None\n    return front(printq)\n\ndef num_jobs(printq):\n    return size(printq)\n\ndef is_pq_empty(printq):\n    return is_empty(printq)", "printer-example": "hp_printer = make_print_queue()\nempty1 = is_empty(hp_printer)\nsend_job(hp_printer, \"phys quiz.doc\")\nsend_job(hp_printer, \"maths quiz.doc\")\nsend_job(hp_printer, \"chem quiz.doc\")\nsend_job(hp_printer, \"econs quiz.doc\")\ncancel_job(hp_printer, \"maths quiz.doc\")\nprint1 = print_job(hp_printer)\nprint(print1)  # phys quiz.doc", "ink": "def make_print_queue():\n    return [make_empty_queue(), 100]\n\ndef send_job(printq, job):\n    enqueue(printq[0], job)\n\ndef print_job(printq):\n    if is_empty(printq[0]):\n        return None\n    if printq[1] == 0:\n        print(\"Please replace the empty ink cartridge.\")\n        return False\n    job = dequeue(printq[0])\n    printq[1] -= 1\n    return job\n\ndef replace_cart(printq):\n    printq[1] = 100\n\ndef cancel_job(printq, job):\n    temp_queue = make_empty_queue()\n    removed = False\n    while not is_empty(printq[0]):\n        current = dequeue(printq[0])\n        if not removed and current == job:\n            removed = True\n        else:\n            enqueue(temp_queue, current)\n    while not is_empty(temp_queue):\n        enqueue(printq[0], dequeue(temp_queue))\n    return None if not removed else printq\n\ndef clear_all(printq):\n    clear(printq[0])\n\ndef next_job(printq):\n    if is_empty(printq[0]):\n        return None\n    return front(printq[0])\n\ndef num_jobs(printq):\n    return size(printq[0])\n\ndef is_pq_empty(printq):\n    return is_empty(printq[0])", "ink-example": "canon_printer = make_print_queue()\nsend_job(canon_printer, \"phys quiz.doc\")\nsend_job(canon_printer, \"maths quiz.doc\")\nprint(canon_printer)  # [[\"phys quiz.doc\", \"maths quiz.doc\"], 100]\nprint(print_job(canon_printer))  # phys quiz.doc\nprint(canon_printer)  # [[\"maths quiz.doc\"], 99]\ncanon_printer[1] = 0\nprint(print_job(canon_printer))  # replacement message, then False\nreplace_cart(canon_printer)\nprint(canon_printer[1])  # 100", "playlist": "def current_song(playlist, minutes):\n    q = make_queue(playlist)\n    index = int(minutes // 4)\n    for _ in range(index % size(q)):\n        enqueue(q, dequeue(q))\n    return front(q)\n\n# Keep this supplied tuple:\njay_chou = ('silent', 'rainbow', 'nocturne', 'excuse')\nprint(current_song(jay_chou, 22))  # rainbow", "playlist-shortcut": "index = int(minutes // 4) % len(playlist)\nsong = playlist[index]  # return this inside your function", "bomb": "def who_wins(tup, n):\n    q = make_queue(tup)\n    while size(q) > 1:\n        for _ in range(n):\n            enqueue(q, dequeue(q))\n        dequeue(q)\n    return front(q)"};
+(function(){
+  const $ = id => document.getElementById(id);
+  const sections = [...document.querySelectorAll('main > section')];
+  let chapter = 'a', part = '1', observer;
+  const partNames = {'1':'Hash values / checksums','2':'Tables without collision','3':'Tables with collisions',review:'Lessons & checklist'};
+  function closeNav(){ $('sidenav').classList.remove('is-open');$('scrim').classList.remove('is-open');document.querySelector('.hamburger').setAttribute('aria-expanded','false'); }
+  function showChapter(next, nextPart, scroll){
+    chapter = next; if(nextPart) part = nextPart;
+    sections.forEach(s => s.hidden = s.dataset.chapter !== chapter || (chapter === 'd' && s.dataset.part !== part));
+    document.querySelectorAll('[data-choose]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.choose === chapter));
+    document.querySelectorAll('[data-part-choose]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.partChoose === part));
+    $('hashParts').hidden = chapter !== 'd';
+    const shown = sections.filter(s=>!s.hidden), contents = $('chapterContents');contents.replaceChildren();
+    if(chapter === 'd'){
+      const li=document.createElement('li'), a=document.createElement('a');
+      a.textContent='Open course assessment ↗'; a.target='_blank';a.rel='noopener';
+      a.href='https://yijc.coursemology.org/courses/2950/assessments/'+({'1':'76524','2':'76525','3':'76526',review:'76526'}[part]);li.append(a);contents.append(li);
+    }
+    shown.forEach((s,i)=>{ const li=document.createElement('li'),a=document.createElement('a'),num=document.createElement('span'),label=document.createElement('span');num.className='num';num.textContent=String(i+1).padStart(2,'0');label.className='label';label.textContent=s.querySelector('h2').textContent;a.href='#'+s.id;a.append(num,label);a.addEventListener('click',closeNav);li.append(a);contents.append(li); });
+    if(observer)observer.disconnect();
+    observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting&&!e.target.hidden){contents.querySelectorAll('a').forEach(a=>{const on=a.hash==='#'+e.target.id;a.classList.toggle('active',on);if(on)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');});$('topbarLabel').textContent=e.target.querySelector('h2').textContent;}}),{rootMargin:'-10% 0px -65% 0px'});
+    shown.forEach(s=>observer.observe(s));
+    $('topbarLabel').textContent=chapter==='a'?'10A · Data Abstraction':chapter==='bc'?'10B–C · Stack & Queue':'10D · '+partNames[part];
+    closeNav();
+    if(scroll){history.replaceState(null,'','#'+shown[0].id);$('main').scrollIntoView({behavior:'instant'});}
+    document.dispatchEvent(new Event('scroll'));
+  }
+  document.querySelectorAll('[data-choose]').forEach(b=>b.onclick=()=>showChapter(b.dataset.choose,null,true));
+  document.querySelectorAll('[data-part-choose]').forEach(b=>b.onclick=()=>showChapter('d',b.dataset.partChoose,true));
+  function followHash(){const target=sections.find(s=>'#'+s.id===location.hash);if(target){showChapter(target.dataset.chapter,target.dataset.part,false);requestAnimationFrame(()=>target.scrollIntoView());}else showChapter(chapter,part,false);}
+  window.addEventListener('hashchange',followHash);followHash();
+
+  const panel=$('pythonDesk'),editor=$('pythonEditor'),output=$('pythonOutput');
+  let previousDraft=null;
+  const draftKey='h2-ch10-python-draft-v1';
+  editor.value='print("Hello, Computing!")\n';
+  try{editor.value=localStorage.getItem(draftKey)||editor.value;}catch(e){}
+  function saveDraft(){try{localStorage.setItem(draftKey,editor.value);$('draftStatus').textContent='· saved in this browser';}catch(e){$('draftStatus').textContent='· use Save .py to keep your code';}}
+  editor.addEventListener('input',saveDraft);
+  function openDesk(){panel.hidden=false;panel.classList.remove('minimized');$('deskMin').textContent='Minimise';$('deskMin').setAttribute('aria-label','Minimise Python panel');$('practiceLaunch').setAttribute('aria-expanded','true');clampPanel();}
+  $('practiceLaunch').onclick=()=>{openDesk();editor.focus();};
+  $('deskClose').onclick=()=>{panel.hidden=true;$('practiceLaunch').setAttribute('aria-expanded','false');$('practiceLaunch').focus();};
+  $('deskMin').onclick=()=>{const small=panel.classList.toggle('minimized');$('deskMin').textContent=small?'Restore':'Minimise';$('deskMin').setAttribute('aria-label',small?'Restore Python panel':'Minimise Python panel');};
+  $('deskMax').onclick=()=>{panel.classList.remove('minimized');$('deskMin').textContent='Minimise';const full=panel.classList.toggle('fullscreen');$('deskMax').textContent=full?'Fit window':'Expand';$('deskMax').setAttribute('aria-label',full?'Restore Python panel size':'Expand Python panel');clampPanel();};
+  function clampPanel(){if(panel.hidden||panel.classList.contains('fullscreen'))return;const r=panel.getBoundingClientRect();panel.style.left=Math.max(8,Math.min(r.left,innerWidth-r.width-8))+'px';panel.style.top=Math.max(8,Math.min(r.top,innerHeight-r.height-8))+'px';panel.style.right='auto';panel.style.bottom='auto';}
+  window.addEventListener('resize',clampPanel);
+  let drag=null;
+  $('deskDrag').addEventListener('pointerdown',e=>{if(e.target.closest('button')||panel.classList.contains('fullscreen'))return;const r=panel.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:r.left,top:r.top};e.currentTarget.setPointerCapture(e.pointerId);});
+  $('deskDrag').addEventListener('pointermove',e=>{if(!drag)return;panel.style.left=drag.left+e.clientX-drag.x+'px';panel.style.top=drag.top+e.clientY-drag.y+'px';panel.style.right='auto';panel.style.bottom='auto';clampPanel();});
+  $('deskDrag').addEventListener('pointerup',()=>drag=null);
+  $('deskDrag').addEventListener('pointercancel',()=>drag=null);
+  $('deskDrag').addEventListener('keydown',e=>{if(e.target!==e.currentTarget||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const r=panel.getBoundingClientRect();panel.style.left=r.left+(e.key==='ArrowLeft'?-20:e.key==='ArrowRight'?20:0)+'px';panel.style.top=r.top+(e.key==='ArrowUp'?-20:e.key==='ArrowDown'?20:0)+'px';clampPanel();});
+  function helperFor(key){if(['reverse','binary','brackets','postfix'].includes(key))return 'stack';if(key==='printer-example')return 'printer';if(key==='ink-example')return 'ink';if(['printer','ink','queue-example','playlist','bomb'].includes(key))return 'queue';return 'none';}
+  document.querySelectorAll('pre.code').forEach(pre=>{
+    const bar=document.createElement('div');bar.className='code-actions';
+    const copy=document.createElement('button');copy.className='copy-code';copy.textContent='Copy';copy.onclick=async()=>{try{await navigator.clipboard.writeText(pre.textContent);copy.textContent='Copied';}catch(e){copy.textContent='Select code to copy';}setTimeout(()=>copy.textContent='Copy',1800);};
+    const tryIt=document.createElement('button');tryIt.className='try-code';tryIt.textContent='Try in Python';tryIt.onclick=()=>{previousDraft={code:editor.value,helper:$('helperChoice').value};editor.value=pre.textContent;$('helperChoice').value=helperFor(pre.dataset.example);saveDraft();openDesk();editor.focus();$('pythonStatus').textContent='Example loaded. Edit it or add a test call, then Run Python.';};bar.append(copy,tryIt);pre.before(bar);
+  });
+  $('restoreDraft').onclick=()=>{if(!previousDraft){$('pythonStatus').textContent='No previous draft yet. Loading an example saves your current draft.';return;}const current={code:editor.value,helper:$('helperChoice').value};editor.value=previousDraft.code;$('helperChoice').value=previousDraft.helper;previousDraft=current;saveDraft();};
+  editor.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();editor.setRangeText('    ',editor.selectionStart,editor.selectionEnd,'end');saveDraft();}if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();run();}});
+  $('downloadCode').onclick=()=>{const blob=new Blob([helperCode()+'\n'+editor.value],{type:'text/x-python'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='computing_practice.py';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  const files=new Map();
+  $('uploadFiles').onclick=()=>$('fileInput').click();
+  $('fileInput').onchange=async e=>{try{for(const file of e.target.files)files.set(file.name,new Uint8Array(await file.arrayBuffer()));$('filesLabel').textContent=[...files.keys()].join(', ')||'No files added';$('pythonStatus').textContent='Files ready. Use open("filename") in Python.';}catch(error){$('pythonStatus').textContent='Could not read file: '+error.message;}e.target.value='';};
+  function helperCode(){const choice=$('helperChoice').value;return choice==='stack'?EXAMPLES['stack-adt']:choice==='queue'?EXAMPLES['queue-adt']:choice==='printer'?EXAMPLES['queue-adt']+'\n\n'+EXAMPLES.printer:choice==='ink'?EXAMPLES['queue-adt']+'\n\n'+EXAMPLES.ink:'';}
+
+  // Python runs in a worker so Stop can terminate even an infinite loop.
+  let worker=null,ready=null,busy=false,timer=null,workerURL=null,rejectStartup=null,runGeneration=0;
+  const workerSource = `
+    let py;
+    // A classic worker avoids module-worker loading problems in local HTML files.
+    // Pin the matching JS/WASM/stdlib release; do not mix runtime versions.
+    const runtimeBases = [
+      'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/',
+      'https://unpkg.com/pyodide@0.27.7/'
+    ];
+    (async()=>{
+      const failures=[];
+      for(const base of runtimeBases){
+        try{
+          postMessage({type:'loading',text:'Loading Python from '+new URL(base).hostname+'…'});
+          importScripts(base+'pyodide.js');
+          py=await loadPyodide({indexURL:base});
+          postMessage({type:'ready'});
+          return;
+        }catch(e){failures.push(base+' '+String(e));}
+      }
+      postMessage({type:'fatal',text:failures.join('\\n')});
+    })();
+    self.onmessage=async({data})=>{
+      if(!py)return;
+      let globals;
+      try{
+        let lines=data.stdin===''?[]:data.stdin.split('\\n'),line=0,count=0;
+        py.setStdin({stdin:()=>line<lines.length?lines[line++]:null});
+        const emit=text=>{count+=text.length+1;if(count>100000)throw new Error('Output limit reached (100 KB).');postMessage({type:'output',text});};
+        py.setStdout({batched:emit});py.setStderr({batched:emit});
+        py.FS.chdir('/home/pyodide');
+        for(const [name,bytes] of data.files)py.FS.writeFile(name,bytes);
+        globals=py.runPython('dict(__name__="__main__")');
+        if(data.helpers)await py.runPythonAsync(data.helpers,{globals});
+        const result=await py.runPythonAsync(data.code,{globals});
+        if(result!==undefined){try{emit(String(result));}finally{if(result&&result.destroy)result.destroy();}}
+        postMessage({type:'done'});
+      }catch(e){postMessage({type:'error',text:String(e)});}
+      finally{if(globals)globals.destroy();}
+    };
+  `;
+  function append(text){if(output.textContent.length<105000){output.textContent+=text+'\n';output.scrollTop=output.scrollHeight;}}
+  function setBusy(value){busy=value;$('runCode').disabled=value;$('stopCode').disabled=!value;}
+  function finish(text){clearTimeout(timer);setBusy(false);$('pythonStatus').textContent=text;}
+  function releaseWorkerURL(){if(workerURL){URL.revokeObjectURL(workerURL);workerURL=null;}}
+  function terminate(){
+    if(worker)worker.terminate();worker=null;ready=null;releaseWorkerURL();clearTimeout(timer);
+    if(rejectStartup){const reject=rejectStartup;rejectStartup=null;reject(new Error('Python startup cancelled.'));}
+  }
+  function ensureWorker(){if(ready)return ready;
+    ready=new Promise((resolve,reject)=>{
+      rejectStartup=reject;
+      workerURL=URL.createObjectURL(new Blob([workerSource],{type:'text/javascript'}));
+      try{worker=new Worker(workerURL);}catch(e){releaseWorkerURL();rejectStartup=null;reject(e);return;}
+      const current=worker;
+      worker.onmessage=({data})=>{
+        if(worker!==current)return;
+        if(data.type==='ready'){rejectStartup=null;releaseWorkerURL();resolve();}
+        else if(data.type==='loading')$('pythonStatus').textContent=data.text;
+        else if(data.type==='output')append(data.text);
+        else if(data.type==='done')finish('Finished');
+        else if(data.type==='error'){append(data.text);finish('Python error · check the traceback above');}
+        else if(data.type==='fatal'){rejectStartup=null;reject(new Error(data.text));}
+      };
+      worker.onerror=e=>{
+        if(worker!==current)return;
+        e.preventDefault();
+        const message=e.message||'The browser could not start the Python worker.';
+        if(rejectStartup){rejectStartup=null;reject(new Error(message));}
+        else {append(message);finish('Python stopped · Run Python to restart');terminate();}
+      };
+    });return ready;
+  }
+  async function run(){if(busy)return;const generation=++runGeneration;saveDraft();output.textContent='';setBusy(true);$('pythonStatus').textContent=worker?'Running…':'Loading Python… first run may take a moment';
+    timer=setTimeout(()=>{++runGeneration;terminate();append('Stopped after 120 seconds. Check the connection or code, then run again.');finish('Timed out · editor kept');},120000);
+    try{await ensureWorker();if(generation!==runGeneration||!busy||!worker)return;$('pythonStatus').textContent='Running…';worker.postMessage({code:editor.value,helpers:helperCode(),stdin:$('stdinText').value,files:[...files.entries()]});}
+    catch(e){if(generation!==runGeneration)return;terminate();append('Python could not start. Open this HTML in a current Chrome, Edge or Firefox browser. If it still fails, check whether the runtime download is blocked.\n\nDetails: '+e.message);finish('Load failed · Run Python to retry');}
+  }
+  $('runCode').onclick=run;
+  $('stopCode').onclick=()=>{++runGeneration;terminate();append('Stopped. Your code and uploaded files are kept.');finish('Stopped · next run reloads Python');};
+})();
+</script>
+</body>
+</html>
